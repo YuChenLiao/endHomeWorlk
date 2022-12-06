@@ -81,8 +81,10 @@ Plane.prototype.init = function (el, musicObj) {
 
   //加载图片，并回调绘制出图片（因为图片是异步加载的，所以要用回调）
   _.imageLoad(this.urlObj, this.imgObj, this.draw.bind(this));
-
-
+  //给canvas2画布添加鼠标移动事件（因为画布2在上面）
+  canvas2.addEventListener('mousemove', this.mouseMove.bind(this));
+  //给canvas2画布添加鼠标右键事件
+  canvas2.addEventListener('contextmenu', this.contextMenu.bind(this));
 }
 
 //渲染图形
