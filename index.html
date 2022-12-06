@@ -36,7 +36,17 @@
 <script src="js/util.js"></script>
 <script src="js/plane.js"></script>
 <script type="text/javascript">
+  var box = document.getElementById('box');
 
+  var bgMusic = document.getElementById('bgMusic');
+  var boomMusic = document.getElementById('boomMusic');
+  var shootMusic = document.getElementById('shootMusic');
+  plane.init(box, {
+    bgMusic: bgMusic,
+    boomMusic: boomMusic,
+    shootMusic: shootMusic
+  }
+  );
 </script>
 
 </html>
