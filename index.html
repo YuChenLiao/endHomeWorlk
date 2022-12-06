@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飞机大战</title>
+  <style>
+    #box {
+      width: 520px;
+      height: 620px;
+      position: absolute;
+      margin: 0 auto;
+      left: 0;
+      right: 0;
+      top: 1px;
+      bottom: 0;
+      border: solid 1px rosybrown;
+    }
+
+    .rebutton {
+      position: absolute;
+      top: 0px;
+      left: 31%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='box'></div>
+  <button onclick="restart()" class='rebutton'>重开</button>
+  <audio id="bgMusic" src="music/bg.wav"></audio>
+  <audio id="boomMusic" src="music/boom.wav"></audio>
+  <audio id="shootMusic" src="music/shoot.wav"></audio>
+</body>
+<script src="js/util.js"></script>
+<script src="js/plane.js"></script>
+<script type="text/javascript">
+
+</script>
+
+</html>
