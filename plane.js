@@ -132,6 +132,47 @@ Plane.prototype.createMyPlane = function () {
   }
 }
 
+//右键事件
+Plane.prototype.contextMenu = function (e) {
+  var e = e || window.event;
+  //取消右键默认事件
+  e.preventDefault && e.preventDefault();
+}
+
+//鼠标移动事件
+Plane.prototype.mouseMove = function (e) {
+  var w = 132, h = 86
+  var pos = _.getOffset(e);//获取鼠标位置
+  var plane = this.myPlane;
+  if (!plane) return;
+  //鼠标在飞机范围内，才会跟随
+  if (plane.isPoint(pos)) {
+    if (isOut.call(this, pos, w, h)) {
+      return;
+    }
+    plane.dx = pos.x - w / 2;
+    plane.dy = pos.y - h / 2;
+  }
+  //判断超出边界
+  function isOut(pos, w, h) {
+    if (pos.x + w / 2 >= this.w) {//超出右边
+      return true;
+    }
+    if (pos.x - w / 2 <= 0) {//超出左边
+      return true;
+    }
+    if (pos.y + h / 2 >= this.h) {//超出下边
+      return true;
+    }
+    if (pos.y - h / 2 <= 0) {//超出上边
+      return true;
+    }
+
+    return false;
+  }
+
+}
+
 //绘制入口
 Plane.prototype.draw = function () {
   this.drawBG();
