@@ -98,11 +98,46 @@ Plane.prototype.clearCanvas = function () {
   this.ctx.clearRect(0, 0, parseInt(this.w), parseInt(this.h));
 }
 
+//创建我机
+Plane.prototype.createMyPlane = function () {
+  var image, myPlane, sx = 0, sy = 0, sWidth = 132, sHeight = 86, dx = 200, dy = 530, dWidth = 132, dHeight = 86;
+  image = this.imgObj['common']['myplane1'];
+  myPlane = new _.ImageDraw({ image: image, sx: sx, sy: sy, sWidth: sWidth, sHeight: sHeight, dx: dx, dy: dy, dWidth: dWidth, dHeight: dHeight });
+  this.renderArr2.push(myPlane);
+  this.myPlane = myPlane;
+
+  //清除自己
+  var obj = this;
+  myPlane.destory = function () {
+    clearInterval(this.timmer);
+    clearInterval(this.boomTimmer);
+    obj.myPlane = null;
+    //游戏结束
+    obj.flag = 'end';
+  }
+  //爆炸函数
+  myPlane.boomIndex = 1;
+  myPlane.boom = function () {
+    obj.boomMusic.play();
+    //切换图片，切换完成，清除定时器
+    myPlane.boomTimmer = setInterval(doboom, 100);
+  }
+
+  function doboom() {
+    if (myPlane.boomIndex > 9) {//爆炸完成
+      //清除当前飞机
+      myPlane.destory();
+    }
+    myPlane.image = obj.imgObj['myplane'][myPlane.boomIndex++];
+  }
+}
+
 //绘制入口
 Plane.prototype.draw = function () {
   this.drawBG();
   this.render();//渲染到页面上
-
+  this.createMyPlane();
+  this.render2();
 }
 
 //绘制背景
