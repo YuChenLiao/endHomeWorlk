@@ -27,7 +27,7 @@ Plane.prototype.loadUrl = function () {
 
   var boom1Obj = {};
   //组装爆炸图片路径
-  for (var j = 1; j <= 9; j++) {
+  for (var j = 1; j <= 4; j++) {
     boom1Obj[j] = "images/myplane1boom/myplane1boom" + j + ".png";
   }
   this.urlObj['myplane'] = boom1Obj;
