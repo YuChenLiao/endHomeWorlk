@@ -175,12 +175,214 @@ Plane.prototype.mouseMove = function (e) {
 
 }
 
+//创建子弹
+Plane.prototype.createBullet=function(plane){
+  this.shootMusic.play();
+  var image,bullet,sx=0,sy=0,sWidth=20,sHeight=30,dx=0,dy=0,dWidth=20,dHeight=30;
+  //计算子弹的位置
+  dx=plane.dx+plane.dWidth/2-10;
+  dy=plane.dy;
+  image = this.imgObj['common']['bullet'];
+  bullet = new _.ImageDraw({image:image,sx:sx,sy:sy,sWidth:sWidth,sHeight:sHeight, dx:dx, dy:dy ,dWidth:dWidth,dHeight:dHeight});
+  this.renderArr2.push(bullet);
+  this.bullets.push(bullet);
+
+  bullet.timmer = setInterval(move.bind(this),80);
+
+  var obj=this;
+  bullet.destory=function(){
+      clearInterval(bullet.timmer);
+      obj.clear(obj.renderArr2,bullet);
+      obj.clear(obj.bullets,bullet);
+  }
+
+  //子弹的移动
+  function move(){
+      if(obj.flag!='start'){
+          clearInterval(bullet.timmer);
+      }
+      bullet.dy-=20;
+      if(bullet.dy<0){
+          //删除当前子弹
+          bullet.destory();
+          return;
+      }
+
+      isHitEnemy(bullet);
+  }
+  //子弹击中敌机
+  function isHitEnemy(bullet){
+      var enemys = obj.enemyPlanes;
+      var enemy;
+      for(var i=0;i<enemys.length;i++){
+          enemy=enemys[i];
+          if(hitEnemy(bullet,enemy)){//如果某个敌机被击中
+              obj.curCount+=10;
+              obj.countObj.text=obj.curCount;
+              //删除当前子弹
+              bullet.destory();
+              //飞机爆炸
+              enemy.boom();
+              if(obj.curCount>obj.count){//胜利
+                  clearInterval(obj.myPlane.timmer);
+                  obj.endShow('suc');
+                  obj.flag='end';
+              }
+              break;
+          }
+      }
+  }
+
+  function hitEnemy(bullet,enemy){
+      //因为子弹比飞机小，所以只需要判断子弹的4个点是否在飞机范围内，如果有则表示碰撞了
+      //左上角
+      var x1 = bullet.dx;
+      var y1 = bullet.dy;
+      //右上角
+      var x2 = x1+bullet.dWidth;
+      var y2 = y1;
+      //右下角
+      var x3 = x1+bullet.dWidth;
+      var y3 = y1+bullet.dHeight;
+      //左下角
+      var x4 = x1;
+      var y4 = y1+bullet.dHeight;
+      //只要有一个点在范围内，则判断为碰撞
+      if(comparePoint(x1,y1,enemy)|| comparePoint(x2,y2,enemy)||comparePoint(x3,y3,enemy)||comparePoint(x4,y4,enemy) ){
+          return true;
+      }
+      return false;
+  }
+  //根据坐标判断是否在指定的范围内
+  function comparePoint(x,y,plane){
+      //大于左上角，小于右下角的坐标则肯定在范围内
+      if(x>plane.dx && y >plane.dy
+          && x<plane.dx+plane.dWidth && y <plane.dy+plane.dHeight	){
+          return  true;
+      }
+      return false;
+  }
+}
+
+//初始化敌机
+Plane.prototype.initEnemyPlane=function(){
+  //定时创建敌机
+  this.eTimmer = setInterval(this.createEnemyPlane.bind(this),500);
+}
+//创建敌机
+Plane.prototype.createEnemyPlane=function(){
+  if(this.flag!='start'){
+      clearInterval(this.eTimmer);
+  }
+
+  if(this.enemyPlanes.length>10) return ;
+
+  var image,enemyPlane,sx=0,sy=0,sWidth=0,sHeight=0,dx=200,dy=0,dWidth=0,dHeight=0;
+  var index = _.getRandom(1,5);
+
+  image = this.imgObj['common']['enemy'+index];
+  sWidth=dWidth=image.width;
+  sHeight=dHeight=image.height;
+  dx = _.getRandom(0,this.w-dWidth);
+  dy = -dHeight;
+
+  enemyPlane = new _.ImageDraw({image:image,sx:sx,sy:sy,sWidth:sWidth,sHeight:sHeight, dx:dx, dy:dy ,dWidth:dWidth,dHeight:dHeight});
+  //this.renderArr2.push(enemyPlane);
+  this.renderArr2.unshift(enemyPlane);
+  this.enemyPlanes.push(enemyPlane);
+  //清除自己
+  var obj=this;
+  enemyPlane.destory=function(){
+      clearInterval(enemyPlane.boomTimmer);
+      clearInterval(enemyPlane.timmer);
+      obj.clear(obj.renderArr2,enemyPlane);
+      obj.clear(obj.enemyPlanes,enemyPlane);
+  }
+  //爆炸函数
+  enemyPlane.boomIndex=1;
+  enemyPlane.boom=function(){
+      obj.boomMusic.play();
+      //切换图片，切换完成，清除定时器
+      enemyPlane.boomTimmer = setInterval(doboom,100);
+  }
+
+  function doboom(){
+      if(enemyPlane.boomIndex>6){//爆炸完成
+          //清除当前飞机
+          enemyPlane.destory();
+      }
+      enemyPlane.image = obj.imgObj['boom'+index][enemyPlane.boomIndex++];
+  }
+  
+  enemyPlane.timmer = setInterval(move.bind(this),50);
+
+  var obj = this;
+  //移动
+  function move(){
+      if(obj.flag!='start'){
+          clearInterval(enemyPlane.timmer);
+          clearInterval(enemyPlane.boomTimmer);
+      }
+      enemyPlane.dy+=2;
+      if(enemyPlane.dy>obj.h){//出界后重新回到上方
+          enemyPlane.dx = _.getRandom(0,obj.w-dWidth);
+          enemyPlane.dy = -dHeight;
+          return ;
+      }
+      //判断与我机碰撞
+      if(obj.myPlane && !obj.myPlane.hitFlag && hitMyPlane(enemyPlane,obj.myPlane)){
+          obj.myPlane.hitFlag=true;
+          //清除子弹发射定时器
+          clearInterval(obj.myPlane.timmer);
+          enemyPlane.boom();
+          obj.myPlane.boom();
+          obj.endShow('end');
+      }
+  }
+
+  function hitMyPlane(enemy,myPlane){
+      if(!enemy||!myPlane){
+          return ;
+      }
+      //因为子弹比飞机小，所以只需要判断子弹的4个点是否在飞机范围内，如果有则表示碰撞了
+      //左上角
+      var x1 = enemy.dx;
+      var y1 = enemy.dy;
+      //右上角
+      var x2 = x1+enemy.dWidth;
+      var y2 = y1;
+      //右下角
+      var x3 = x1+enemy.dWidth;
+      var y3 = y1+enemy.dHeight;
+      //左下角
+      var x4 = x1;
+      var y4 = y1+enemy.dHeight;
+      //只要有一个点在范围内，则判断为碰撞
+      if(comparePoint(x1,y1,myPlane)|| comparePoint(x2,y2,myPlane)||comparePoint(x3,y3,myPlane)||comparePoint(x4,y4,myPlane) ){
+          return true;
+      }
+      return false;
+  }
+  //根据坐标判断是否在指定的范围内
+  function comparePoint(x,y,plane){
+      //大于左上角，小于右下角的坐标则肯定在范围内
+      if(x>plane.dx && y >plane.dy
+          && x<plane.dx+plane.dWidth && y <plane.dy+plane.dHeight	){
+          return  true;
+      }
+      return false;
+  }
+}
+
 //绘制入口
-Plane.prototype.draw = function () {
+Plane.prototype.draw=function(){
   this.drawBG();
   this.render();//渲染到页面上
   this.createMyPlane();
   this.render2();
+
+  //开启主线程
+  this.timmer = setInterval(this.reDraw.bind(this),100);
 }
 
 //绘制背景
@@ -190,6 +392,13 @@ Plane.prototype.drawBG = function () {
   image = this.imgObj['common']['bg'];
   img = new _.ImageDraw({ image: image, sx: sx, sy: sy, sWidth: sWidth, sHeight: sHeight, dx: dx, dy: dy, dWidth: dWidth, dHeight: dHeight });
   this.renderArr.push(img);
+}
+
+//重新绘制
+Plane.prototype.reDraw=function(){
+  if(this.flag=='start'){
+      this.render2();
+  }
 }
 
 global.plane = plane;
