@@ -35,7 +35,7 @@ Plane.prototype.loadUrl = function () {
   for (var index = 1; index <= 4; index++) {
     var boomObj = {};
     //组装爆炸图片路径
-    for (var i = 1; i <= 6; i++) {
+    for (var i = 1; i <= 4; i++) {
       boomObj[i] = "images/enemy" + index + "boom/enemy" + index + "boom" + i + ".png";
     }
     //分组方便取
