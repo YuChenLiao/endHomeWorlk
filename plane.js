@@ -17,7 +17,7 @@ function Plane() {
 //组装图片路径
 Plane.prototype.loadUrl = function () {
   //组装普通图片路径
-  var nameArr = ['bg', 'bullet', 'myplane1', 'bullet1','bullet2', 'enemy1', 'enemy2', 'enemy3', 'enemy4', 'win', 'lost'];
+  var nameArr = ['bg', 'bullet', 'myplane1', 'bullet1','bullet2','bullet3','bullet_supply','boom_supply', 'enemy1', 'enemy2', 'enemy3', 'enemy4', 'win', 'lost'];
   var commonObj = {};
   for (var i = 0; i < nameArr.length; i++) {
     commonObj[nameArr[i]] = "images/" + nameArr[i] + ".png";
